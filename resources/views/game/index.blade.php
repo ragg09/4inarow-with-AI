@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>4inarow | Dumb AI</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
         integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
@@ -103,8 +103,11 @@
                     <h2 class="accordion-header" id="headingTwo">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                            Player vs Bot
+                            Player vs Bot <span data-toggle="tooltip" data-placement="top"
+                                title="This AI is not quite smart but can stop and predict your move, the smarter one is still work in progress and its main purpose is to stop every 2 chain occurs"
+                                style="width: 30px; padding: 5px; border: 1px solid black; background-color: black; margin-left: 5px; border-radius: 50%; color:white; text-align: center; font-size: 18px;">?</span>
                         </button>
+
                     </h2>
                     <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
                         data-bs-parent="#accordionExample">
@@ -156,5 +159,11 @@
 
 <script src="{{ URL::asset('js/game.js') }}"></script>
 <script src="{{ URL::asset('js/game_with_bot.js') }}"></script>
+
+<script>
+    $(function() {
+        $("[data-toggle=tooltip").tooltip();
+    })
+</script>
 
 </html>
