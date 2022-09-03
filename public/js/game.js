@@ -9,15 +9,13 @@ $(function(){
 
 
 
-
     //setting up the board
     for (let i = 0; i < 42; i++) {
-       $('#board').append("<div id='cell_"+ i + "' class='cell text-center'></div>");
+       $('#board').append("<div id='cell_"+ i + "' class='cell text-center'>"+i+"</div>");
     }
 
     //hide the board on load
     $('#board').toggle();
-
 
 
     //making sure that players are indicated
@@ -25,15 +23,12 @@ $(function(){
         if($('#player_1').val() != "" && $('#player_2').val() != ""){
 
             if( $('#player_1').val() != $('#player_2').val()){
-
-                console.log("dapa");
-                $('#board').toggle();
+                $('#start_button').removeAttr('disabled');
             }else{
                 alert('invalid input')
             }
         }
     });
-
 
 
 
@@ -49,10 +44,9 @@ $(function(){
             success: function(data) {
                 console.log(data);
 
-                // $('#whosturn').text('Red Team Turn');
-                // //show the board after making sure players are ready
-                // $('#board').toggle();
-
+                $('#whosturn').text('Red Team Turn');
+                //show the board after making sure players are ready
+                $('#board').toggle();
 
 
             },
@@ -64,15 +58,12 @@ $(function(){
     });
 
 
-
     //on click events where the actual game take place
     $('.cell').each(function(){
 
         $(this).click(function(){
 
-
             $('.cell').each(function(){
-
 
                 if( $(this).attr('data-id') == 1 || $(this).attr('data-id') == 2){
                     if($("#play_with_bot").val() != "" ){
@@ -96,7 +87,6 @@ $(function(){
             count++;
 
 
-
             // //check if cell calls
             // alert($(this).attr('id'));
 
@@ -108,10 +98,8 @@ $(function(){
             changeTurn_checkWinner(player_turn);
 
 
-
         })
     })
-
 
 
 
@@ -127,13 +115,11 @@ $(function(){
 
         }else{
 
-
             console.log('player 2');
                 player_turn = 1;
                 $('#whosturn').text('Red Team Turn');
 
         }
-
 
 
         //horizontal checking
@@ -147,14 +133,13 @@ $(function(){
                 }
 
                 if(line >= 4){
-                    declareWinner(p);
+                    declareWinner();
                 }
             }
             //start with 0 for next loop
             line = 0;
 
         }
-
 
         //vertical checking
         for (let i = 0; i < 7; i++) {
@@ -167,7 +152,7 @@ $(function(){
                 }
 
                 if(line >= 4){
-                    declareWinner(p);
+                    declareWinner();
                 }
             }
             //start with 0 for next loop
@@ -185,16 +170,15 @@ $(function(){
                 && $('#cell_' + (left + 8)).attr('data-id') == p
                 && $('#cell_' + (left + 16)).attr('data-id') == p
                 && $('#cell_' + (left + 24)).attr('data-id') == p){
-                    declareWinner(p);
+                    declareWinner();
                 }
 
                 if($('#cell_' + right).attr('data-id') == p
                 && $('#cell_' + (right + 6)).attr('data-id') == p
                 && $('#cell_' + (right + 12)).attr('data-id') == p
                 && $('#cell_' + (right + 18)).attr('data-id') == p){
-                    declareWinner(p);
+                    declareWinner();
                 }
-
 
                 left++;
                 right = left + 3;
@@ -211,49 +195,83 @@ $(function(){
 
 
 
-
-    function declareWinner(p){
-
-        if($("#play_with_bot").val() != ""){
-            if(p == 1){
-
-                alert('WINNER: ' + $('#player_1_with_bot').val() + " of Red Team");
-
-                $('#winner_bot').val($('#player_1_with_bot').val());
-            }else{
-                alert('WINNER: BOT');
-                $('#winner_bot').val("BOT");
-            }
-
-            $('#initiate_players_with_bot').trigger('submit');
-
-        }else{
-            if(p == 1){
-
-                alert('WINNER: ' + $('#player_1').val() + " of Red Team");
-                $('#winner').val($('#player_1').val());
-            }else{
-                alert('WINNER: ' + $('#player_2').val() + " of Red Team");
-                $('#winner').val($('#player_1_with_bot').val());
-            }
-
-            $('#initiate_players').trigger('submit');
-        }
-
-        location.reload();
-
+    function declareWinner(){
+        console.log('WINNER');
     }
-
 
 
 
     function AIDecisions(){
 
         var id = last_selected.split("_")
+        var horizontal_series = [];
+
+        //2 SERIES PREDICTION
+        //horizontal checking
+        for (let i = 0; i < 42; i+=7) {
+            for (let j = 0; j < 7; j++) {
+                var selected_id = $("#cell_" + (i+j));
+                if(selected_id.attr('data-id') == 1){
+                    horizontal_series.push(i+j);
+                }else{
+                    horizontal_series = [];
+                }
+
+                if(horizontal_series.length == 2){
+                    console.log( horizontal_series.toString());
+
+                    // horizontal_series.toString();
+
+                    $.ajax({
+                        type: "DELETE",
+                        data:{
+                            _token: $("input[name=_token]").val()
+                        },
+                        url: '/dataset/' +  horizontal_series.toString(),
+                        success: function(data) {
+
+                            if(data.length > 1){
+                                console.log("ako namn");
+                            }else{
+                                var rem_data = data[0].data.replace(horizontal_series.toString()+",", "");
+                                var splitred_dta = rem_data.split(",");
+                                // console.log(splitred_dta);
+
+                                //getting the closest number from human move
+                                const closest = splitred_dta.reduce((a, b) => {
+                                    return Math.abs(b - id[1]) < Math.abs(a - id[1]) ? b : a;
+                                });
 
 
-        //FOR SINLGE ATTACKS
-        $.ajax({
+                                //THE AI IS ABLE TO DETECT THE CHAIN, BUT THE EXECUTION HAS A LITTLE ERROR
+                                console.log(closest);
+
+                                if (  $("#cell_" +  closest).attr('data-id') == 1 ||  $("#cell_" +  closest).attr('data-id') == 2 ) {
+                                    AIDecisions();
+                                }else{
+                                    $("#cell_" +  closest).css('background-color', "blue");
+                                    $("#cell_" +  closest).attr('data-id',  2);
+                                    player_turn = 1;
+                                    changeTurn_checkWinner(2);
+                                }
+
+                            }
+
+                        }
+                    });
+
+                    // return false;
+                }
+            }
+
+            horizontal_series = [];
+
+        }
+
+        if(player_turn == 2){
+
+            //FOR SINLGE ATTACKS
+         $.ajax({
             type: "GET",
             url: '/dataset/' + id[1],
             success: function(data) {
@@ -277,7 +295,6 @@ $(function(){
                     return Math.abs(b - id[1]) < Math.abs(a - id[1]) ? b : a;
                 });
 
-
                 // console.log(closest);
 
                 if (  $("#cell_" +  closest).attr('data-id') == 1 ||  $("#cell_" +  closest).attr('data-id') == 2 ) {
@@ -289,9 +306,9 @@ $(function(){
                     changeTurn_checkWinner(2);
                 }
 
-
             }
         });
+        }
 
 
 
@@ -312,5 +329,6 @@ $(function(){
 
 
 
-
 })
+
+
