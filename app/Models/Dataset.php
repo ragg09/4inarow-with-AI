@@ -9,4 +9,9 @@ class Dataset extends Model
 {
     use HasFactory;
     protected $table = 'datasets';
+
+    protected $fillable = [
+        'data',
+    ];
+    public $timestamps = true;
 }

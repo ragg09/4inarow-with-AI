@@ -25,7 +25,7 @@ class DatasetController extends Controller
      */
     public function create()
     {
-        //
+        return view('dataset_maker.feed');
     }
 
     /**
@@ -36,7 +36,11 @@ class DatasetController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Dataset::Create([
+            "data" => $request->data,
+        ]);
+
+        return redirect(route('dataset.create'));
     }
 
     /**
